@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "Stopping raspi-ir-mpdc service..."
+
+sudo systemctl stop raspi-ir-mpdc
+sudo systemctl disable raspi-ir-mpdc
+
+echo "Removing raspi-ir-mpdc service..."
+
+sudo rm -rf /lib/systemd/system/raspi-ir-mpdc.service
+sudo rm -rf /usr/local/bin/raspi-ir-mpdc.py
+
+if [ -e /etc/raspi-ir-mpdc.conf ]
+  then
+    read -p "Delete '/etc/raspi-ir-mpdc.conf' configuration file? (y/N)" delfile
+    if [ "$delfile" == "y" -o "$delfile" == "Y" ]
+      then
+        echo "Deleting configuration file."
+        sudo rm -rf /etc/raspi-ir-mpdc.conf
+    fi
+fi
+
+echo "raspi-ir-mpdc service uninstalled."

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "Installing raspi-ir-mpdc service..."
+
+echo "Installing required packages"
+sudo apt install python3-systemd
+sudo python3 -m pip install evdev
+sudo python3 -m pip install python-mpd2
+
+if [ -e /etc/raspi-ir-mpdc.conf ]
+  then
+    read -p "Overwrite existing configuration file '/etc/raspi-ir-mpdc.conf' (y/N)?" ov
+  else
+    ov="y"
+fi
+
+if [ "$ov" == "y" -o "$ov" == "Y" ]
+  then
+    sudo cp raspi-ir-mpdc.conf /etc
+fi
+
+if  [ -e /usr/local/bin/raspi-ir-mpdc.py ]
+  then
+    echo "Updating service script '/usr/local/bin/raspi-ir-mpdc.py' (temporarily stopping service)"
+    sudo systemctl stop raspi-ir-mpdc
+fi
+
+sudo cp raspi-ir-mpdc.py /usr/local/bin/
+sudo chmod +x /usr/local/bin/raspi-ir-mpdc.py
+sudo cp persistentmpdc.py /usr/local/bin/
+sudo chmod +x /usr/local/bin/persistentmpdc.py
+
+sudo cp raspi-ir-mpdc.service /lib/systemd/system
+
+echo "Starting raspi-ir-mpdc service..."
+
+sudo systemctl enable raspi-ir-mpdc
+sudo systemctl daemon-reload
+sudo systemctl start raspi-ir-mpdc
+
+echo "raspi-ir-mpdc service installed."

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo "Reconfigure raspi-ir-mpdc service..."
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+sudo systemctl stop raspi-ir-mpdc
+sudo cp -u raspi-ir-mpdc.conf /etc
+sudo systemctl start raspi-ir-mpdc
+sleep 3
+systemctl status raspi-ir-mpdc
+
+echo "Done."
+
