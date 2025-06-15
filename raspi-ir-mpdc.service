@@ -21,11 +21,10 @@ AssertFileNotEmpty=/etc/raspi-ir-mpdc.conf
 
 [Service]
 Type=simple
-EnvironmentFile=/etc/gpiozero_pin_factory.conf
 ExecStart=/usr/bin/python3 /usr/local/bin/raspi-ir-mpdc.py
 WorkingDirectory=/usr/local/bin/
 User = pi
-# Group = gpio
+Group = input
 Restart = on-abnormal 
 RestartSec = 10
 TimeoutStartSec = infinity

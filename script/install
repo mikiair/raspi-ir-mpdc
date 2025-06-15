@@ -8,6 +8,7 @@ echo "Installing raspi-ir-mpdc service..."
 
 echo "Installing required packages"
 sudo apt install python3-systemd
+sudo apt install ir-keytable
 sudo python3 -m pip install evdev
 sudo python3 -m pip install python-mpd2
 
@@ -31,6 +32,8 @@ fi
 
 sudo cp raspi-ir-mpdc.py /usr/local/bin/
 sudo chmod +x /usr/local/bin/raspi-ir-mpdc.py
+sudo cp raspimpdc.py /usr/local/bin/
+sudo chmod +x /usr/local/bin/raspimpdc.py
 sudo cp persistentmpdc.py /usr/local/bin/
 sudo chmod +x /usr/local/bin/persistentmpdc.py
 

@@ -23,13 +23,19 @@ sudo systemctl stop raspi-ir-mpdc
 
 sudo cp -u raspi-ir-mpdc.py /usr/local/bin/
 sudo chmod +x /usr/local/bin/raspi-ir-mpdc.py
+sudo cp -u raspimpdc.py /usr/local/bin/
+sudo chmod +x /usr/local/bin/raspimpdc.py
+sudo cp -u persistentmpdc.py /usr/local/bin/
+sudo chmod +x /usr/local/bin/persistentmpdc.py
 
 sudo cp -u raspi-ir-mpdc.service /lib/systemd/system
 
 echo "Restarting raspi-ir-mpdc service..."
 sudo systemctl daemon-reload
 sudo systemctl start raspi-ir-mpdc
-sleep 3
-systemctl status raspi-ir-mpdc
+
+echo "Waiting for service to restart..."
+sleep 5
+systemctl status raspi-ir-mpdc --no-pager -n 5
 
 echo "raspi-ir-mpdc service updated."

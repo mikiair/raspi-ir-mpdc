@@ -9,10 +9,11 @@ Key events from IR remote control can be configured to control a MPD/Mopidy serv
 
 Required packages
 -----------------
-* `Mopidy <https://mopidy.com/>`_ with `Mopidy-MPD <https://mopidy.com/ext/mpd>`_ extension (or another MPD server)
-* python3-systemd
-* python3-mpd / python-mpd2
-* python-evdev
+* `Mopidy <https://mopidy.com/>`_ with `Mopidy-MPD <https://mopidy.com/ext/mpd>`_ extension (or some other MPD server)
+* `python3-systemd <https://github.com/systemd/python-systemd>`_
+* python3-mpd / `python-mpd2 <https://github.com/Mic92/python-mpd2>`_
+* `ir-keytable` to process IR remote data and map to key events
+* `python-evdev <https://pypi.org/project/evdev/>`_
 
 Installation
 ------------
@@ -39,62 +40,62 @@ The configuration is defined in the file ``raspi-ir-mpdc.conf``. Before installa
 After installation, the active version is in **/etc** folder.
 
 Section [IR]
-==============
-Section ``[IR]`` is mandatory. It requires one or more, but unique keys of the pattern ``ButtonN`` or ``RotEncN`` where N is replaced by integer numbers. 
+============
+Section ``[IR]`` is mandatory. It requires the definition of an input device to read key events from, and a list of key events linked to triggered MPD actions.
 
-1) The ``ButtonN`` key-value-pairs must be created based on this pattern:
+1) The ``InputDevice`` key-value-pair must be set as follows:
 
-   ``ButtonN = input_pin_number,up|dn|upex|dnex,press|release,trigger_event[,bouncetime_ms]``
+   ``InputDevice = device_path``
+   
+   ``device_path``
+     Must be a path starting with ``/dev/input/event`` or an integer number (0, 1, 2...).
+     It selects the input device, like an IR remote, which sends key commands to be processed and mapped to MPD events.
 
-   ``input_pin_number``
-     The GPIO pin in BCM format to which a button is connected. If this GPIO pin is already in use by this or another application you will get an error and the service will not start.
-   ``up|dn|upex|dnex``
-     Selects the pull-up or pull-down resistor for the pin which can use Raspi internal ones, or *external* resistor provided by your circuit.
-   ``press|release``
-     Determines the button event for triggering the MPD event, namely when button is *pressed* or *released*.
+   e.g.
+
+   ``InputDevice = /dev/input/event0``
+
+   configures the first available input device to be used as a source for the service.
+
+#) The list of ``KEY_...xxx`` key-value-pairs must be created based on this pattern:
+
+   ``KEY_xxx = trigger_event[, keystate]``
+
+   ``KEY_xxx``
+     Any of the predefined Linux key event codes (list with ``cat /usr/include/linux/input-event-codes.h | grep '#define KEY_'``).
+     They must be linked to incoming IR remote data in your own custom keytable file.
    ``trigger_event``
      The MPD event to trigger. One of:
-  
+   
      * play_pause - toggle playback state between *play* and *pause*
      * play_stop - toggle playback state between *play* and *stop*
-     * prev_track - select previous track
-     * next_track - select next track
+     * prev_track - go to the previous track/stream in the playlist
+     * next_track - go to the next track/stream in the playlist
      * mute - toggle output state between *mute* and *unmute*
      * vol_up - increase output volume
      * vol_dn - decrease output volume
      * prev_src - switch to the previous source
      * next_src - switch to the next source
-  
-   ``bouncetime_ms``
-     (*optional*) Defines the time in milliseconds during which subsequent button events will be ignored. Default is 50ms.
+     * repeat - enable/disable track/playlist repeat
+     * single - enable/disable stop after track
+     * random - enable/disable random track
+     * consume - enable/disable track removed after play
+     * fastfwd - advance the playing track position by 10 seconds
+     * rewind - rewind the playing track position by 10 seconds
 
-   e.g.
+   ``keystate``
+     (*optional*) The key state to act on. One of:
 
-   ``Button0 = 9,upex,press,mute,100``
-
-   configures pin GPIO9 as input expecting an external pull-up resistor, and acting when button is pressed with a bounce time of 100ms, to mute/unmute the output
-
-#) The ``RotEncN`` key-value-pairs must be created based on this pattern:
-
-   ``RotEncN = input_pin_A,input_pin_B,up|dn|upex|dnex,rot_ccw_event,rot_cw_event[,bouncetime_ms]``
-
-   ``input_pin_A,input_pin_B``
-     The pair of GPIO pins to which a rotary encoder is connected. The sequence of high-low-high transitions determines the rotation direction. (Remaining physical pins are usually connected to *GND* and a button switch.)
-     If one or both of these GPIO pins are already in use by this or another application you will get an error and the service will not start.
-   ``up|dn|upex|dnex``
-     Selects the type of pull resistors for the two pins which can use Raspi internal ones, or *external* resistors provided by your circuit or module.
-   ``rot_ccw_event``
-     The event to trigger when the rotary encoder is turned counter-clockwise. Same as for buttons.
-   ``rot_cw_event``
-     The event to trigger when the rotary encoder is turned clockwise. Same as for buttons.
-   ``bouncetime_ms``
-     (*optional*) Defines the time in milliseconds during which subsequent encoder events will be ignored. Default is 20ms.
+     * up - default, event(s) will be triggered when key is released
+     * down    - ...when key is pressed
+     * hold    - ...while key is held
+     * dn_hold - ...when key is pressed down and while held
      
    e.g.
    
-   ``RotEnc0 = 18,19,upex,vol_dn,vol_up``
+   ``KEY_VOLUMEUP = vol_up, dn_hold``
    
-   configures pins GPIO18 and GPIO19 expecting a pair of external pull-up resistors, to act as inputs from a rotary encoder which turns volume down and up, respectively.
+   configures the KEY_VOLUMEUP event to trigger the *vol_up* event of the MPD server when the key on the IR remote is pressed down and repeatedly while it is held.
 
 Section [MPD]
 =============
