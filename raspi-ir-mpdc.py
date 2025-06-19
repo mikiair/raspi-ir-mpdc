@@ -151,7 +151,7 @@ class RaspiIRMPDClient(RaspiBaseMPDClient):
 
     def keyhandlerLoop(self):
         """Read IR remote key events from the input device and trigger MPD actions.
-        
+
         Acts only when key state is matching required condition (up, down, hold).
         """
         for event in self._inputDevice.read_loop():

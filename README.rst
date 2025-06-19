@@ -14,6 +14,7 @@ Required packages
 * python3-mpd / `python-mpd2 <https://github.com/Mic92/python-mpd2>`_
 * `ir-keytable` to process IR remote data and map to key events
 * `python-evdev <https://pypi.org/project/evdev/>`_
+* `raspi-mpdc <https://github.com/mikiair/raspi-mpdc>`_
 
 Installation
 ------------
